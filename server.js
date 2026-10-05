@@ -31,6 +31,27 @@ if (process.env.NODE_ENV !== 'test') {
   app.use(morgan('dev'));
 }
 
+// Root API status endpoint
+app.get('/', (req, res) => {
+  res.json({
+    company: 'MODUPRO INNOVATION PVT. LTD.',
+    service: 'Backend REST API',
+    status: 'online',
+    tagline: 'Faithfully Delivering Excellence',
+    location: 'Nagpur, Maharashtra, India',
+    version: '1.0.0',
+    endpoints: {
+      health: '/api/health',
+      products: '/api/products',
+      categories: '/api/products/categories',
+      services: '/api/services',
+      industries: '/api/industries',
+      enquiries: 'POST /api/enquiries',
+      quotes: 'POST /api/quotes',
+    },
+  });
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({
