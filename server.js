@@ -2,18 +2,29 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import fs from 'fs';
 import { productsData } from './data/products.js';
 import { Product } from './models/Product.js';
 import { Inquiry } from './models/Inquiry.js';
 
 dotenv.config();
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express();
 const PORT = process.env.PORT || 3100;
+const HOST = process.env.HOST || '0.0.0.0';
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/modu_pro';
 
 // Middleware
-app.use(cors());
+const corsOrigin = process.env.CLIENT_URL || '*';
+app.use(cors({
+  origin: corsOrigin === '*' ? '*' : corsOrigin.split(','),
+  credentials: true
+}));
 app.use(express.json());
 
 // In-Memory Fallback Store (for immediate zero-config local run)
@@ -195,7 +206,17 @@ app.get('/api/inquiries', async (req, res) => {
   }
 });
 
+// Serve frontend build if available (Unified MERN deployment on Render)
+const clientDistPath = path.resolve(__dirname, '../client/dist');
+if (fs.existsSync(clientDistPath)) {
+  app.use(express.static(clientDistPath));
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) return next();
+    res.sendFile(path.join(clientDistPath, 'index.html'));
+  });
+}
+
 // Start server
-app.listen(PORT, '127.0.0.1', () => {
-  console.log(`🚀 Modu Pro Server running on http://127.0.0.1:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Modu Pro Server running on port ${PORT}`);
 });
