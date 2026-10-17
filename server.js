@@ -24,19 +24,19 @@ let isMongoConnected = false;
 async function initDatabase() {
   try {
     await mongoose.connect(MONGODB_URI, {
-      serverSelectionTimeoutMS: 3000
+      serverSelectionTimeoutMS: 10000
     });
     isMongoConnected = true;
-    console.log('✅ Connected to MongoDB successfully.');
+    console.log(`✅ Connected to MongoDB Atlas successfully [Host: ${mongoose.connection.host}, DB: ${mongoose.connection.name}].`);
 
     // Sync products if collection has older schema or count mismatch
     const sample = await Product.findOne();
     if (!sample || !sample.id || (await Product.countDocuments()) !== productsData.length) {
       await Product.collection.drop().catch(() => {});
       await Product.insertMany(productsData);
-      console.log(`📦 Re-synced ${productsData.length} products to MongoDB with updated schema.`);
+      console.log(`📦 Seeded ${productsData.length} products to MongoDB Atlas collection.`);
     } else {
-      console.log(`📦 Verified ${productsData.length} products in MongoDB.`);
+      console.log(`📦 Verified ${productsData.length} products active in MongoDB Atlas.`);
     }
   } catch (err) {
     isMongoConnected = false;
@@ -57,7 +57,7 @@ app.get('/api/health', (req, res) => {
     status: 'ok',
     timestamp: new Date().toISOString(),
     service: 'Modu Pro Innovation API',
-    database: isMongoConnected ? 'MongoDB' : 'In-Memory Store',
+    database: isMongoConnected ? `MongoDB Atlas (${mongoose.connection.host}/${mongoose.connection.name})` : 'In-Memory Store',
     totalProducts: productsData.length
   });
 });
