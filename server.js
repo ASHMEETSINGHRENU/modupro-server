@@ -20,10 +20,35 @@ const HOST = process.env.HOST || '0.0.0.0';
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/modu_pro';
 
 // Middleware
-const corsOrigin = process.env.CLIENT_URL || '*';
+const allowedOrigins = [
+  'https://modupro-dun.vercel.app',
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://localhost:3000',
+  'http://127.0.0.1:5173'
+];
+
+if (process.env.CLIENT_URL && process.env.CLIENT_URL !== '*') {
+  process.env.CLIENT_URL.split(',').map(s => s.trim()).forEach(url => {
+    if (url && !allowedOrigins.includes(url)) allowedOrigins.push(url);
+  });
+}
+
 app.use(cors({
-  origin: corsOrigin === '*' ? '*' : corsOrigin.split(','),
-  credentials: true
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (
+      allowedOrigins.includes(origin) ||
+      origin.endsWith('.vercel.app') ||
+      process.env.CLIENT_URL === '*'
+    ) {
+      return callback(null, true);
+    }
+    return callback(null, true);
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 app.use(express.json());
 
@@ -99,6 +124,11 @@ app.get('/', (req, res) => {
     <div class="badge"><span class="dot"></span> Operational &bull; MongoDB Atlas Live</div>
     <h1>Modu Pro Innovation Pvt. Ltd.</h1>
     <p>Central India B2B API gateway for wood adhesives, precision Yash tooling, panel processing machinery, and Square One edge-banding tapes.</p>
+    <div style="margin-bottom: 22px;">
+      <a class="link-btn" href="https://modupro-dun.vercel.app" target="_blank" style="background: #8C460C; color: #ffffff; justify-content: center; font-weight: 600; text-align: center; gap: 8px;">
+        <span>Launch Web Application &rarr; modupro-dun.vercel.app</span>
+      </a>
+    </div>
     <div class="endpoints">
       <h2>Active API Endpoints</h2>
       <div class="link-group">
