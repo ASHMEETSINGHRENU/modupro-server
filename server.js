@@ -58,9 +58,69 @@ async function initDatabase() {
 
 initDatabase();
 
+const clientDistPath = path.resolve(__dirname, '../client/dist');
+
 // ============================================================================
 // API ROUTES
 // ============================================================================
+
+// Root Route: API Gateway & Status Dashboard
+app.get('/', (req, res) => {
+  if (fs.existsSync(clientDistPath)) {
+    return res.sendFile(path.join(clientDistPath, 'index.html'));
+  }
+
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.send(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Modu Pro Innovation — API Gateway</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: #F8F5EF; color: #1f1d1e; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+    .card { background: #ffffff; max-width: 580px; width: 100%; border: 1px solid #e5e5e5; border-radius: 16px; padding: 36px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); }
+    .badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 9999px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; background: #eef7ee; color: #1e7e34; margin-bottom: 20px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #28a745; display: inline-block; }
+    h1 { font-size: 24px; font-weight: 600; color: #8C460C; margin-bottom: 8px; letter-spacing: -0.02em; }
+    p { font-size: 14px; color: #6a6a6a; line-height: 1.6; margin-bottom: 24px; }
+    .endpoints { border-top: 1px solid #e5e5e5; padding-top: 20px; }
+    .endpoints h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: #8C460C; margin-bottom: 12px; }
+    .link-group { display: flex; flex-direction: column; gap: 10px; }
+    .link-btn { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #f1efe9; border-radius: 10px; color: #1f1d1e; text-decoration: none; font-size: 13px; font-weight: 500; transition: background 0.2s; }
+    .link-btn:hover { background: #e5e2da; }
+    .method { font-size: 11px; font-weight: 700; color: #8C460C; }
+    .meta { margin-top: 24px; font-size: 12px; color: #888; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="badge"><span class="dot"></span> Operational &bull; MongoDB Atlas Live</div>
+    <h1>Modu Pro Innovation Pvt. Ltd.</h1>
+    <p>Central India B2B API gateway for wood adhesives, precision Yash tooling, panel processing machinery, and Square One edge-banding tapes.</p>
+    <div class="endpoints">
+      <h2>Active API Endpoints</h2>
+      <div class="link-group">
+        <a class="link-btn" href="/api/health" target="_blank">
+          <span><code>/api/health</code> &bull; Cluster Diagnostics</span>
+          <span class="method">GET</span>
+        </a>
+        <a class="link-btn" href="/api/products" target="_blank">
+          <span><code>/api/products</code> &bull; Full Product Catalog (19 Items)</span>
+          <span class="method">GET</span>
+        </a>
+        <a class="link-btn" href="/api/inquiries" target="_blank">
+          <span><code>/api/inquiries</code> &bull; Commercial RFQ Quotes</span>
+          <span class="method">GET / POST</span>
+        </a>
+      </div>
+    </div>
+    <div class="meta">&copy; ${new Date().getFullYear()} Modu Pro Innovation Pvt. Ltd. &bull; Nagpur, Maharashtra.</div>
+  </div>
+</body>
+</html>`);
+});
 
 // Health Check
 app.get('/api/health', (req, res) => {
@@ -207,7 +267,6 @@ app.get('/api/inquiries', async (req, res) => {
 });
 
 // Serve frontend build if available (Unified MERN deployment on Render)
-const clientDistPath = path.resolve(__dirname, '../client/dist');
 if (fs.existsSync(clientDistPath)) {
   app.use(express.static(clientDistPath));
   app.get('*', (req, res, next) => {
